@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d18">
+<title>HOSSAIN AI 2.0</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#111b2d;--blue:#54d6ff;--muted:#9db3ca}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#f4f8ff;font:16px system-ui,Arial;min-height:100vh;display:flex;justify-content:center}
+main{width:min(100%,760px);height:100dvh;display:flex;flex-direction:column;padding:0 14px}
+header{padding:17px 4px 12px;display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#12334a;border:1px solid #28627f;color:var(--blue);font-size:23px}
+h1{font-size:19px;margin:0;letter-spacing:.8px}small{color:var(--muted)}
+.hero{background:linear-gradient(135deg,#11243a,#101a2b);border:1px solid #203a55;border-radius:18px;padding:13px;margin:4px 0 10px}
+.hero p{margin:5px 0 0;color:#b5c9dd;font-size:13px;line-height:1.5}
+.settings{display:flex;gap:8px;align-items:center;margin:0 0 8px}
+select{background:#0b1422;color:#fff;border:1px solid #31445c;border-radius:12px;padding:10px;min-width:0}
+#chat{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px 0 14px}
+.msg{max-width:90%;padding:12px 14px;border-radius:16px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.bot{align-self:flex-start;background:#172235;border:1px solid #24364e}
+.user{align-self:flex-end;background:#164c68}
+.controls{background:#101a2b;border:1px solid #24364e;border-radius:20px;padding:9px;display:flex;gap:7px;margin:0 0 max(12px,env(safe-area-inset-bottom))}
+input{min-width:0;flex:1;background:#0b1422;border:1px solid #31445c;border-radius:15px;padding:12px;color:white;font-size:16px;outline:none}
+button{border:0;border-radius:14px;background:#17344a;color:var(--blue);font-size:17px;min-width:45px;padding:10px}
+button:active{filter:brightness(1.3)}
+.hint{text-align:center;color:#71869d;font-size:11px;padding:0 0 8px}
+.status{font-size:12px;color:#9db3ca;margin:0 2px 6px}
+</style>
+</head>
+<body><main>
+<header><div class="logo">✦</div><div><h1>HOSSAIN AI 2.0</h1><small>Multilingual Voice Assistant · Demo</small></div></header>
+<section class="hero"><strong>নমস্কার! আমি HOSSAIN AI</strong><p>বাংলা • हिंदी • English — লিখে বা মাইক্রোফোনে প্রশ্ন করো। আমি উত্তর পড়ে শোনাতে পারি। সাধারণ জ্ঞান ও কিছু offline প্রশ্নের উত্তরও দিতে পারি।</p></section>
+<div class="settings">
+  <label for="lang" style="font-size:13px;color:#b5c9dd">ভাষা:</label>
+  <select id="lang" aria-label="ভাষা নির্বাচন">
+    <option value="bn-IN">বাংলা</option><option value="hi-IN">हिन्दी</option><option value="en-IN">English</option>
+  </select>
+  <button id="voiceToggle" type="button" aria-pressed="true">🔊 Voice ON</button>
+</div>
+<div id="status" class="status">Ready · Offline demo</div>
+<section id="chat" aria-live="polite"></section>
+<form class="controls" id="form"><input id="input" autocomplete="off" placeholder="এখানে প্রশ্ন লিখুন…"><button type="button" id="mic" title="Voice input">🎙</button><button type="submit" title="Send">➤</button></form>
+<div class="hint">AI internet answers require a secure AI server connection. Never paste a private API key into this file.</div>
+</main>
+<script>
+const chat=document.querySelector('#chat'), input=document.querySelector('#input');
+const lang=document.querySelector('#lang'), statusEl=document.querySelector('#status');
+let voiceOn=true;
+function add(text,who='bot'){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+function speak(t){
+ if(!voiceOn || !('speechSynthesis' in window))return;
+ const u=new SpeechSynthesisUtterance(t);u.lang=lang.value;
+ speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+function answer(q){
+ const s=q.toLowerCase().trim();
+ const isBn=lang.value==='bn-IN', isHi=lang.value==='hi-IN';
+ if(/^(hi|hello|hey)\b|হ্যালো|নমস্কার|नमस्ते|हेलो/.test(s))
+   return isHi?'नमस्ते! मैं HOSSAIN AI हूँ। आप क्या जानना चाहते हैं?':isBn?'নমস্কার! আমি HOSSAIN AI। কী জানতে চাও?':'Hello! I am HOSSAIN AI. What would you like to know?';
+ if(/তোমার নাম|your name|तुम्हारा नाम/.test(s))
+   return isHi?'मेरा नाम HOSSAIN AI है।':isBn?'আমার নাম HOSSAIN AI।':'My name is HOSSAIN AI.';
+ if(/সময়|সময়|time|समय/.test(s)) return (isHi?'अभी समय है: ':isBn?'এখন সময়: ':'Current time: ')+new Date().toLocaleTimeString();
+ if(/তারিখ|date|तारीख/.test(s)) return (isHi?'आज की तारीख: ':isBn?'আজকের তারিখ: ':'Today’s date: ')+new Date().toLocaleDateString();
+ if(/capital of india|ভারতের রাজধানী|भारत की राजधानी/.test(s)) return isHi?'भारत की राजधानी नई दिल्ली है।':isBn?'ভারতের রাজধানী নয়াদিল্লি।':'The capital of India is New Delhi.';
+ if(/capital of west bengal|পশ্চিমবঙ্গের রাজধানী|पश्चिम बंगाल की राजधानी/.test(s)) return isHi?'पश्चिम बंगाल की राजधानी कोलकाता है।':isBn?'পশ্চিমবঙ্গের রাজধানী কলকাতা।':'The capital of West Bengal is Kolkata.';
+ if(/সূর্য.*(কোথা|কী)|sun.*(star|what)|सूर्य.*(क्या|तारा)/.test(s)) return isHi?'सूर्य एक तारा है।':isBn?'সূর্য একটি নক্ষত্র।':'The Sun is a star.';
+ if(/পানি.*(ফর্মুলা|সংকেত)|water.*formula|पानी.*(सूत्र|फॉर्मूला)/.test(s)) return isHi?'पानी का रासायनिक सूत्र H₂O है।':isBn?'পানির রাসায়নিক সংকেত H₂O।':'The chemical formula for water is H₂O.';
+ if(/help|সাহায্য|मदद/.test(s)) return isHi?'आप मुझसे सामान्य ज्ञान, समय, तारीख और बुनियादी सवाल पूछ सकते हैं।':isBn?'তুমি সাধারণ জ্ঞান, সময়, তারিখ ও কিছু সাধারণ প্রশ্ন করতে পারো।':'You can ask general knowledge, time, date, and basic questions.';
+ if(/who are you|তুমি কে|तुम कौन हो/.test(s)) return isHi?'मैं HOSSAIN AI, एक शुरुआती वॉइस असिस्टेंट डेमो हूँ।':isBn?'আমি HOSSAIN AI, একটি প্রাথমিক Voice Assistant Demo।':'I am HOSSAIN AI, an early voice assistant demo.';
+ return isHi?'आपका सवाल मिला। इस डेमो में हर सवाल का जवाब देने के लिए अभी online AI जुड़ा नहीं है।':isBn?'তোমার প্রশ্ন পেয়েছি। তবে এই Demo-তে এখনো Online AI যুক্ত নেই, তাই সব প্রশ্নের উত্তর দিতে পারছি না।':'I received your question. Online AI is not connected in this demo yet, so I cannot answer every question.';
+}
+function send(text){const v=(text??input.value).trim();if(!v)return;add(v,'user');input.value='';const a=answer(v);add(a);speak(a);}
+document.querySelector('#form').addEventListener('submit',e=>{e.preventDefault();send();});
+document.querySelector('#mic').addEventListener('click',()=>{
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){add('এই browser-এ voice recognition নেই। Chrome-এ চেষ্টা করো অথবা লিখে পাঠাও।');return;}
+ const r=new SR();r.lang=lang.value;r.interimResults=false;r.maxAlternatives=1;
+ statusEl.textContent='Listening… microphone-এ কথা বলো';
+ r.onresult=e=>{statusEl.textContent='Ready';input.value=e.results[0][0].transcript;send();};
+ r.onerror=()=>{statusEl.textContent='Voice input unavailable';add('Voice input কাজ করেনি। Microphone permission, internet ও browser support পরীক্ষা করো।');};
+ r.onend=()=>{if(statusEl.textContent==='Listening… microphone-এ কথা বলো')statusEl.textContent='Ready';};
+ try{r.start();}catch(e){statusEl.textContent='Ready';add('Microphone শুরু করা যায়নি।');}
+});
+document.querySelector('#voiceToggle').addEventListener('click',e=>{
+ voiceOn=!voiceOn;e.currentTarget.textContent=voiceOn?'🔊 Voice ON':'🔇 Voice OFF';e.currentTarget.setAttribute('aria-pressed',String(voiceOn));if(!voiceOn&&'speechSynthesis'in window)speechSynthesis.cancel();
+});
+add('নমস্কার! আমি HOSSAIN AI। ভাষা নির্বাচন করে লিখে বা মাইক্রোফোনে প্রশ্ন করো।');
+</script></body></html>
